@@ -6,8 +6,10 @@
     "start": "node app.js"
   },
   "dependencies": {
+    "cloudinary": "^1.0.12",
     "express": "3.4.8",
     "jade": "*",
-    "stylus":"*" 
+    "stylus": "*",
+    "cloudinary": "*"
   }
 }

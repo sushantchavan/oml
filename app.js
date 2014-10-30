@@ -24,9 +24,10 @@ app.use(express.urlencoded());
 app.use(express.methodOverride());
 app.use(app.router);
 app.use(stylus.middleware({
-   src: __dirname + '/public/stylesheets',
-   dest: __dirname + '/public/stylesheets'
+   src: __dirname + '/public/stylesheets/',
+   dest: __dirname + '/public/stylesheets/'
  }));
+console.log(__dirname);
 app.use(express.static(path.join(__dirname, 'public')));
 
 // development only
