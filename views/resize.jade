@@ -1,0 +1,78 @@
+extends layout
+block content
+	div.images
+		form(id="update_image", method="post", action="/resize", enctype="multipart/form-data")
+			div.well.well-lg.well-custom
+				h2 Click and drag on the image to resize
+				input.btn.btn-block.btn-success#updateImage(type="submit")
+			div.well.well-lg.well-custom
+				div.pull-left
+					img.img#img1(src="#{croppedImage[0]}", width="755", height="450")
+					input#img1_width_user_input(value, type="hidden", name="img1_width")
+					input#img1_height_user_input(value, type="hidden", name="img1_height")
+					input#img1_id(value="#{publicId[0]}", type="hidden", name="img1_publicId")
+				div.pull-right
+					div.btn-group
+						h4 Custom Width
+						span#img1width.label.label-info 0
+					div.btn-group
+						h4 Custom Height
+						span#img1height.label.label-info 0 
+
+			div.well.well-sm.well-custom
+				div.pull-left
+					img.img#img2(src="#{croppedImage[1]}", width="365", height="450", user-height, user-width)
+					input#img2_width_user_input(value, type="hidden", name="img2_width")
+					input#img2_height_user_input(value, type="hidden", name="img2_height")
+					input#img2_id(value="#{publicId[1]}", type="hidden", name="img2_publicId")
+				div.box
+					div.btn-group.box-user-input
+						h4 Custom Width
+						span#img2width.label.label-info 0
+					div.btn-group.box-user-input
+						h4 Custom Height
+						span#img2height.label.label-info 0
+			div.well.well-custom
+				div.pull-left
+					img.img#img3(src="#{croppedImage[2]}", width="365", height="212", user-height, user-width)
+					input#img3_width_user_input(value, type="hidden", name="img3_width")
+					input#img3_height_user_input(value, type="hidden", name="img3_height")
+					input#img3_id(value="#{publicId[2]}", type="hidden", name="img3_publicId")
+					div
+						div.btn-group.box-user-input
+							h4 Custom Width
+							span#img3width.label.label-info 0
+						div.btn-group.box-user-input
+							h4 Custom Height
+							span#img3height.label.label-info 0 
+				div.pull-right
+					img.img#img4(src="#{croppedImage[3]}", width="380", height="380", user-height, user-width)
+					input#img4_user_input(user-height, user-width, type="hidden")
+					input#img4_width_user_input(value, type="hidden", name="img4_width")
+					input#img4_height_user_input(value, type="hidden", name="img4_height")
+					input#img4_id(value="#{publicId[3]}", type="hidden", name="img4_publicId")
+					div
+						div.btn-group.box-user-input
+							h4 Custom Width
+							span#img4width.label.label-info 0
+						div.btn-group.box-user-input
+							h4 Custom Height
+							span#img4height.label.label-info 0 
+block script
+	script(type="text/javascript").
+		$(document).ready(function() {
+			$('.img').imgAreaSelect({
+				handles:true, 
+				show:true, 
+				onSelectEnd: function(img, selection ) {
+					var id = img.id;
+					$('#'+id+'_height_user_input').attr("value",selection.height);
+					$('#'+id+'_width_user_input').attr("value",selection.width);
+				},
+				onSelectChange: function(img, selection) {
+					var id = img.id;
+					$('#'+id+'height').text(selection.height);
+					$('#'+id+'width').text(selection.width);
+				}
+				});
+		});

@@ -1,12 +1,12 @@
 extends layout
-script
-	$(":file").filestyle();
-
 block content
 	h1= title
 	p Pre-Work OML by Sushant
-	form(id="uplod_image", method="post", action="")
+	form(id="uplod_image", method="post", action="/", enctype="multipart/form-data")
 		div.input-group.input-group-lg
-			input.filestyle(type="file", accept="image/*", placeholder="placeholder")
+			input.filestyle(type="file", accept="image/*", name="image")
 		div.input-group.input-group-lg
 			input.btn.btn-block.btn-success(type="submit")
+block script
+	script
+		$(":file").filestyle();
