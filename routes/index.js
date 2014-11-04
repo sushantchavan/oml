@@ -38,8 +38,8 @@ module.exports = function (app) {
 									height = 450;
 									cloudinary.uploader.upload(files.image.path, function(result) { 
 										console.log(result.url)
-								  		croppedImage[i] = result.url;
-								  		publicId[i] = result.public_id;
+								  		croppedImage[i].push(result.url);
+								  		publicId[i].push(result.public_id);
 									}, { width:width, height:height});	
 									break;
 								case 1:
@@ -47,8 +47,8 @@ module.exports = function (app) {
 									height = 450;
 									cloudinary.uploader.upload(files.image.path, function(result) { 
 								  		console.log(result.url)
-								  		croppedImage[i] = result.url;
-								  		publicId[i] = result.public_id;
+								  		croppedImage[i].push(result.url);
+								  		publicId[i].push(result.public_id);
 									}, { width:width, height:height});	
 									break;
 								case 2:
@@ -56,8 +56,8 @@ module.exports = function (app) {
 									height = 212;
 									cloudinary.uploader.upload(files.image.path, function(result) { 
 								  		console.log(result.url)
-								  		croppedImage[i] = result.url;
-								  		publicId[i] = result.public_id;
+								  		croppedImage[i].push(result.url);
+								  		publicId[i].push(result.public_id);
 									}, { width:width, height:height});	
 									break;
 								case 3:
