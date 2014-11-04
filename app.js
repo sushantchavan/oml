@@ -13,6 +13,9 @@ var app = express();
 var stylus = require('stylus');	//include stylus
 
 // all environments
+app.use(express.cookieParser());
+app.use(express.session({secret: '1234567890QWERTY'}));
+
 app.set('port', process.env.PORT || 3000);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');

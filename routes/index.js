@@ -4,7 +4,8 @@
  */
 var cloudinary = require('cloudinary'),
 	easyimg = require('easyimage'),
-	formidable = require('formidable');
+	formidable = require('formidable'),
+	aysnc = require('async');
 
 	cloudinary.config({ 
 	  cloud_name: process.env.CLOUDINARY_CLOUD, 
@@ -14,6 +15,26 @@ var cloudinary = require('cloudinary'),
 
 module.exports = function (app) {
 	
+	function updateImage (width, height, id, croppedImage, publicId, callback) {
+		cloudinary.api.update(id, function (result) {
+			console.log(result);
+			croppedImage.push(result.url);
+			publicId.push(result.public_id);
+			callback();
+		}, {width: width, height: height});
+	}
+
+	function uploadImage (width, height, path, croppedImage, publicId, callback) {
+		cloudinary.uploader.upload(path, function (result) {
+			console.log(result);
+			croppedImage.push(result.url);
+			publicId.push(result.public_id);
+			callback();
+		}, {width: width, height: height});
+		
+	}
+
+	
 	app.get('/', function(req, res){
 		res.render('index');
 	});
@@ -21,65 +42,39 @@ module.exports = function (app) {
 	app.post('/', function(req, res){
 		
 		var form = new formidable.IncomingForm();
-		var default_width = 1024, 
+			croppedImage = [],
+			publicId = [],
+			func = [],
+			default_width = 1024, 
 			default_height = 1024;
-			
+
+		function callback () {
+			if(croppedImage.length >= 4 && publicId.length >= 4 ) {
+				if(req.session.croppedImage != undefined) {
+					req.session.croppedImage = null;
+				}
+				if(req.session.publicId != undefined) {
+					req.session.publicId = null;
+				}
+				req.session.croppedImage = croppedImage;
+				req.session.publicId = publicId;
+				res.redirect('/resize');
+				
+			}
+				
+		}
+
 		form.parse(req, function(err, fields, files) {
 			if(files.image !== undefined) {
 				easyimg.info(files.image.path).then(function (image) { console.log(image)
+					
 					if(image.width == default_width && image.height == default_height) {
-						var croppedImage = [];
-						var publicId = [];
-						for (var i = 0 ; i < 4; i++) {
-							var width = 0, height = 0;
-							switch(i) {
-								case 0:
-									width = 755;
-									height = 450;
-									cloudinary.uploader.upload(files.image.path, function(result) { 
-										console.log(result.url)
-								  		croppedImage[i].push(result.url);
-								  		publicId[i].push(result.public_id);
-									}, { width:width, height:height});	
-									break;
-								case 1:
-									width = 365;
-									height = 450;
-									cloudinary.uploader.upload(files.image.path, function(result) { 
-								  		console.log(result.url)
-								  		croppedImage[i].push(result.url);
-								  		publicId[i].push(result.public_id);
-									}, { width:width, height:height});	
-									break;
-								case 2:
-									width = 365;
-									height = 212;
-									cloudinary.uploader.upload(files.image.path, function(result) { 
-								  		console.log(result.url)
-								  		croppedImage[i].push(result.url);
-								  		publicId[i].push(result.public_id);
-									}, { width:width, height:height});	
-									break;
-								case 3:
-									width = 380;
-									height = 380;
-									cloudinary.uploader.upload(files.image.path, function(result) { 
-								  		console.log(result.url)
-								  		croppedImage[i] = result.url;
-								  		publicId[i] = result.public_id;
-								  		console.log('that step' + croppedImage[0])
-								  		console.log('that step' + croppedImage[1])
-								  		console.log('that step' + croppedImage[2])
-								  		console.log('that step' + croppedImage[3])
-								  		res.render('resize', {croppedImage :croppedImage, publicId: publicId });
-									}, { width:width, height:height});	
-									break;	
-
-							}
-							console.log('this step'+croppedImage);							
-						};
-							//res.render('resize', {croppedImage :croppedImage, publicId: publicId });
 						
+						uploadImage(755, 450, files.image.path, croppedImage, publicId, callback);
+						uploadImage(365, 450, files.image.path, croppedImage, publicId, callback);
+						uploadImage(365, 212, files.image.path, croppedImage, publicId, callback);
+						uploadImage(380, 380, files.image.path, croppedImage, publicId, callback);
+
 					} else {
 						res.render('error', error='Image size is to 1024x1024. Please try again');
 					}
@@ -90,35 +85,62 @@ module.exports = function (app) {
 	});
 
 	app.get('/resize', function(req, res){
-		var croppedImage = req.body.croppedImage;
-		var publicId = req.body.publicId;
+
+		var croppedImage = req.session.croppedImage;
+		var publicId = req.session.publicId;
 
 		res.render('resize', {croppedImage :croppedImage, publicId: publicId });
 	});
 
 	app.post('/resize', function(req, res){
-		var form = new formidable.IncomingForm();
+		var form = new formidable.IncomingForm(),
+			croppedImage = [],
+			publicId = [];
+
+		function callback () {
+			if(croppedImage.length >= 4 && publicId.length >= 4  ) {
+				console.log('we get inside')
+				console.log(croppedImage)
+				req.session.croppedImage = croppedImage;
+				req.session.publicId = publicId;
+				res.redirect('/resize');
+			}
+				
+		}
+
 		form.parse(req, function(err, fields, files) {
 			if(fields.img1_width != '' && fields.img1_height != '') {
-				cloudinary.api.update(fields.img1_publicId, function(result) {
-
-				},{width: fields.img1_width , height: fields.img1_height });
+				
+				updateImage(fields.img1_width, fields.img1_height, fields.img1_id, croppedImage, publicId, callback);
+			
+			} else {
+				croppedImage.push(req.session.croppedImage[0]);
+				publicId.push(req.session.publicId[0]);
 			}
-			if(fields.img2_width != '' && fields.img2_height != '') {
-				cloudinary.api.update(fields.img2_publicId, function(result) {
 
-				},{width: fields.img2_width , height: fields.img2_height });
+			if(fields.img2_width != '' && fields.img2_height != '') {
+				
+				updateImage(fields.img2_width, fields.img1_height, fields.img2_id, croppedImage, publicId, callback);
+			
+			} else {
+				croppedImage.push(req.session.croppedImage[1]);
+				publicId.push(req.session.publicId[1]);
 			}
 			if(fields.img3_width != '' && fields.img3_height != '') {
-				cloudinary.api.update(fields.img3_publicId, function(result) {
-
-				},{width: fields.img3_width , height: fields.img3_height });
+			
+				updateImage(fields.img3_width, fields.img1_height, fields.img3_id, croppedImage, publicId, callback);
+			
+			} else {
+				croppedImage.push(req.session.croppedImage[2]);
+				publicId.push(req.session.publicId[2]);
 			}
 			if(fields.img4_width != '' && fields.img4_height != '') {
-				cloudinary.api.update(fields.img4_publicId, function(result) {
-
-				},{width: fields.img4_width , height: fields.img4_height });
+				updateImage(fields.img4_width, fields.img1_height, fields.img4_id, croppedImage, publicId, callback);
+			} else {
+				croppedImage.push(req.session.croppedImage[3]);
+				publicId.push(req.session.publicId[3]);
 			}
+			
 		});
 
 	});
